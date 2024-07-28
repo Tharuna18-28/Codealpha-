@@ -1,0 +1,68 @@
+import java.util.Scanner;
+
+public class StudentGradeTracker {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of students: ");
+        int numStudents = scanner.nextInt();
+
+        int[] grades = new int[numStudents];
+
+       for (int i = 0; i < numStudents; i++) {
+            while (true) {
+                System.out.print("Enter grade for student " + (i + 1) + ": ");
+                int grade = scanner.nextInt();
+                if (grade >= 0 && grade <= 100) {
+                    grades[i] = grade;
+                    break;
+                } else {
+                    System.out.println("Invalid grade. Please enter a grade between 0 and 100.");
+                }
+            }
+        }
+
+
+        if (numStudents > 0) {
+            double average = calculateAverage(grades);
+            int highest = findHighest(grades);
+            int lowest = findLowest(grades);
+
+            System.out.printf("Average grade: %.2f%n", average);
+            System.out.println("Highest grade: " + highest);
+            System.out.println("Lowest grade: " + lowest);
+        } else {
+            System.out.println("No grades entered.");
+        }
+
+        scanner.close();
+    }
+
+    public static double calculateAverage(int[] grades) {
+        int sum = 0;
+        for (int grade : grades) {
+            sum += grade;
+        }
+        return (double) sum / grades.length;
+    }
+
+    public static int findHighest(int[] grades) {
+        int highest = grades[0];
+        for (int grade : grades) {
+            if (grade > highest) {
+                highest = grade;
+            }
+        }
+        return highest;
+    }
+
+    public static int findLowest(int[] grades) {
+        int lowest = grades[0];
+        for (int grade : grades) {
+            if (grade < lowest) {
+                lowest = grade;
+            }
+        }
+        return lowest;
+    }
+}
