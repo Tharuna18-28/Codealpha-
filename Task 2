@@ -1,0 +1,145 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+class MarketData {
+    private Map<String, Double> stockPrices;
+
+    public MarketData() {
+        stockPrices = new HashMap<>();
+        stockPrices.put("AAPL", 150.0);
+        stockPrices.put("GOOG", 2500.0);
+        stockPrices.put("MSFT", 200.0);
+    }
+
+    public double getStockPrice(String ticker) {
+        return stockPrices.getOrDefault(ticker, 0.0);
+    }
+}
+
+class TradingEngine {
+    private double budget;
+    private Map<String, Integer> portfolio;
+
+    public TradingEngine(double budget) {
+        this.budget = budget;
+        portfolio = new HashMap<>();
+    }
+
+    public void buyStock(String ticker, int quantity, MarketData marketData) {
+        double stockPrice = marketData.getStockPrice(ticker);
+        if (stockPrice != 0.0 && budget >= stockPrice * quantity) {
+            budget -= stockPrice * quantity;
+            portfolio.put(ticker, portfolio.getOrDefault(ticker, 0) + quantity);
+            System.out.println("Bought " + quantity + " shares of " + ticker);
+        } else {
+            System.out.println("Insufficient budget or invalid ticker");
+        }
+    }
+
+    public void sellStock(String ticker, int quantity) {
+        if (portfolio.getOrDefault(ticker, 0) >= quantity) {
+            double stockPrice = 100.0; // Assuming a fixed selling price for simplicity
+            budget += stockPrice * quantity;
+            portfolio.put(ticker, portfolio.get(ticker) - quantity);
+            System.out.println("Sold " + quantity + " shares of " + ticker);
+        } else {
+            System.out.println("Insufficient shares to sell");
+        }
+    }
+
+    public double getBudget() {
+        return budget;
+    }
+
+    public Map<String, Integer> getPortfolio() {
+        return portfolio;
+    }
+}
+
+class PortfolioTracker {
+    private TradingEngine tradingEngine;
+    private MarketData marketData;
+
+    public PortfolioTracker(TradingEngine tradingEngine, MarketData marketData) {
+        this.tradingEngine = tradingEngine;
+        this.marketData = marketData;
+    }
+
+    public double calculatePortfolioValue() {
+        double value = 0.0;
+        for (Map.Entry<String, Integer> entry : tradingEngine.getPortfolio().entrySet()) {
+            value += marketData.getStockPrice(entry.getKey()) * entry.getValue();
+        }
+        return value;
+    }
+
+    public double calculateReturns() {
+        return calculatePortfolioValue() / tradingEngine.getBudget();
+    }
+}
+
+class UserInterface {
+    private TradingEngine tradingEngine;
+    private PortfolioTracker portfolioTracker;
+    private Scanner scanner;
+
+    public UserInterface(TradingEngine tradingEngine, PortfolioTracker portfolioTracker) {
+        this.tradingEngine = tradingEngine;
+        this.portfolioTracker = portfolioTracker;
+        this.scanner = new Scanner(System.in);
+    }
+
+    public void displayMenu() {
+        System.out.println("1. Buy Stock");
+        System.out.println("2. Sell Stock");
+        System.out.println("3. View Portfolio");
+        System.out.println("4. Exit");
+    }
+
+    public void run() {
+        MarketData marketData = new MarketData();
+        while (true) {
+            displayMenu();
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter ticker: ");
+                    String ticker = scanner.next();
+                    System.out.print("Enter quantity: ");
+                    int quantity = scanner.nextInt();
+                    tradingEngine.buyStock(ticker, quantity, marketData);
+                    break;
+                case 2:
+                    System.out.print("Enter ticker: ");
+                    ticker = scanner.next();
+                    System.out.print("Enter quantity: ");
+                    quantity = scanner.nextInt();
+                    tradingEngine.sellStock(ticker, quantity);
+                    break;
+                case 3:
+                    System.out.println("Budget: " + tradingEngine.getBudget());
+                    System.out.println("Portfolio: " + tradingEngine.getPortfolio());
+                    System.out.println("Portfolio Value: " + portfolioTracker.calculatePortfolioValue());
+                    System.out.println("Returns: " + portfolioTracker.calculateReturns());
+                    break;
+                case 4:
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice");
+            }
+        }
+    }
+}
+
+public class SimulatedTradingPlatform {
+    public static void main(String[] args) {
+        MarketData marketData = new MarketData();
+        TradingEngine tradingEngine = new TradingEngine(10000.0);
+        PortfolioTracker portfolioTracker = new PortfolioTracker(tradingEngine, marketData);
+        UserInterface userInterface = new UserInterface(tradingEngine, portfolioTracker);
+        userInterface.run();
+    }
+}
